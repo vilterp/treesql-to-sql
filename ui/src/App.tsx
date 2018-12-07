@@ -1,21 +1,25 @@
 import React, { Component } from "react";
 import { ObjectInspector } from "react-inspector";
+import { DateTime, Duration, DurationUnit } from "luxon";
 
 import "./App.css";
 
 interface ConsoleState {
   query: string;
+  // TODO(vilterp): unify these into an API call state thing
   loading: boolean;
   loadErr: string | null;
   response: string | null;
+  responseTime: Duration | null;
 }
 
 class App extends Component<{}, ConsoleState> {
   state: ConsoleState = {
-    query: `SELECT json_agg(json_build_object('id', id, 'name', name)) FROM clusters`,
+    query: `MANY clusters { id, name }`,
     loading: false,
     loadErr: null,
     response: null,
+    responseTime: null,
   };
 
   handleUpdateQuery = (newQuery: string) => {
@@ -30,6 +34,7 @@ class App extends Component<{}, ConsoleState> {
       ...prevState,
       loading: true,
     }));
+    const startTime = DateTime.local();
     fetch("http://localhost:9000/query", {
       method: "POST",
       body: this.state.query,
@@ -48,17 +53,21 @@ class App extends Component<{}, ConsoleState> {
         }
 
         res.json().then(jsonRes => {
-          console.log("jsonRes:", jsonRes);
           this.setState(prevState => ({
             ...prevState,
             loading: false,
             loadErr: null,
             response: jsonRes,
+            responseTime: DateTime.local().diff(startTime),
           }));
         });
       })
       .catch(err => {
-        console.error("error running query:", err);
+        this.setState(prevState => ({
+          ...prevState,
+          loading: false,
+          loadErr: err.toString(),
+        }));
       });
   };
 
@@ -79,7 +88,15 @@ class App extends Component<{}, ConsoleState> {
       return null;
     }
 
-    return <ObjectInspector data={this.state.response} />;
+    return (
+      <>
+        {this.state.responseTime
+          ? // jesus christ Luxon; why can't you be the same as Go's time.Duration??
+            `${this.state.responseTime.as("milliseconds")}ms`
+          : null}
+        <ObjectInspector data={this.state.response} />
+      </>
+    );
   };
 
   render() {

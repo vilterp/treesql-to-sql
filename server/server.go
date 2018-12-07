@@ -9,11 +9,13 @@ import (
 	"net/http"
 
 	_ "github.com/lib/pq"
+	"github.com/vilterp/treesql-to-sql/parserlib"
 )
 
 type Server struct {
-	conn *sql.DB
-	mux  *http.ServeMux
+	conn    *sql.DB
+	mux     *http.ServeMux
+	grammar *parserlib.Grammar
 }
 
 func NewServer(connParams string) (*Server, error) {
@@ -22,11 +24,17 @@ func NewServer(connParams string) (*Server, error) {
 		return nil, err
 	}
 
+	gram, err := parserlib.TestTreeSQLGrammar()
+	if err != nil {
+		return nil, err
+	}
+
 	mux := http.NewServeMux()
 
 	s := &Server{
-		conn: conn,
-		mux:  mux,
+		conn:    conn,
+		mux:     mux,
+		grammar: gram,
 	}
 
 	mux.Handle("/query", http.HandlerFunc(s.serveSQL))
@@ -45,7 +53,24 @@ func (s *Server) serveSQL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	rows, err := s.conn.Query(string(query))
+	traceTree, err := s.grammar.Parse("select", string(query))
+	if err != nil {
+		// TODO(vilterp): really need to wrap this so I can just return an error
+		msg := fmt.Sprintf("parsing query: %v", err)
+		log.Println("error", msg)
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := w.Write([]byte(msg)); err != nil {
+			log.Println("error writing error:", err)
+		}
+		return
+	}
+
+	log.Println("query:", traceTree.Format().String())
+
+	// TODO: generate
+	sqlQuery := "select json_agg(json_build_object('id', id, 'name', name, 'created_at', created_at)) FROM clusters"
+
+	rows, err := s.conn.Query(string(sqlQuery))
 	if err != nil {
 		log.Println("error running query:", err)
 		w.WriteHeader(http.StatusBadRequest)

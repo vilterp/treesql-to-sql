@@ -16,7 +16,7 @@ func TestServer(t *testing.T) {
 
 	ts := httptest.NewServer(util.Logger(s))
 
-	body := strings.NewReader("SELECT json_agg(json_build_object('id', id, 'name', name)) FROM clusters")
+	body := strings.NewReader("MANY clusters { id }")
 	resp, err := ts.Client().Post(ts.URL+"/query", "application/x-sql", body)
 	assert.NoError(t, err)
 
