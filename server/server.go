@@ -35,6 +35,8 @@ func NewServer(connParams string) (*Server, error) {
 }
 
 func (s *Server) serveSQL(w http.ResponseWriter, req *http.Request) {
+	w.Header().Add("Access-Control-Allow-Origin", "http://localhost:3000")
+
 	query, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		log.Println("error reading body:", err)
