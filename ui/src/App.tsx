@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import { ObjectInspector } from "react-inspector";
+
+import "./App.css";
 
 interface ConsoleState {
   query: string;
@@ -68,16 +71,21 @@ class App extends Component<{}, ConsoleState> {
   };
 
   renderResponse = () => {
+    if (this.state.loading) {
+      return "Loading...";
+    }
+
     if (!this.state.response) {
       return null;
     }
 
-    return <pre>{JSON.stringify(this.state.response, null, 2)}</pre>;
+    return <ObjectInspector data={this.state.response} />;
   };
 
   render() {
     return (
       <div className="App">
+        <h1>Console</h1>
         <textarea
           style={{ fontFamily: "monospace" }}
           rows={20}
@@ -89,6 +97,7 @@ class App extends Component<{}, ConsoleState> {
         <button onClick={this.handleSubmit} disabled={this.state.loading}>
           Run
         </button>
+        <br />
         {this.renderError()}
         {this.renderResponse()}
       </div>
