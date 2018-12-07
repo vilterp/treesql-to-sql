@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http/httptest"
 	"strings"
@@ -17,17 +16,14 @@ func TestServer(t *testing.T) {
 
 	ts := httptest.NewServer(util.Logger(s))
 
-	body := strings.NewReader("SELECT * FROM clusters")
-	resp, err := ts.Client().Post(ts.URL + "/sql", "application/x-sql", body)
+	body := strings.NewReader("SELECT json_agg(json_build_object('id', id, 'name', name)) FROM clusters")
+	resp, err := ts.Client().Post(ts.URL+"/query", "application/x-sql", body)
 	assert.NoError(t, err)
-
-	fmt.Println("resp:", resp)
 
 	assert.Equal(t, 200, resp.StatusCode)
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	assert.NoError(t, err)
 
-	fmt.Println("respBytes:", respBytes)
-
-	assert.Contains(t, string(respBytes), "Rows")
+	assert.Contains(t, string(respBytes), `"id":`)
+	assert.Contains(t, string(respBytes), `"name":`)
 }
