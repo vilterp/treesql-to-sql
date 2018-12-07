@@ -3,6 +3,7 @@ package server
 import (
 	"bufio"
 	"database/sql"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -47,7 +48,11 @@ func (s *Server) serveSQL(w http.ResponseWriter, req *http.Request) {
 	rows, err := s.conn.Query(string(query))
 	if err != nil {
 		log.Println("error running query:", err)
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusBadRequest)
+		// TODO(vilterp): return this as JSON
+		if _, err := w.Write([]byte(fmt.Sprintf("error running query: %v", err))); err != nil {
+			log.Println("error writing error:", err)
+		}
 		return
 	}
 

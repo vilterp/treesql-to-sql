@@ -33,12 +33,14 @@ class App extends Component<{}, ConsoleState> {
     })
       .then(res => {
         if (res.status !== 200) {
-          this.setState(prevState => ({
-            ...prevState,
-            loading: false,
-            loadErr: `Error: ${res.status}`,
-            response: null,
-          }));
+          res.text().then(text => {
+            this.setState(prevState => ({
+              ...prevState,
+              loading: false,
+              loadErr: `${text}`,
+              response: null,
+            }));
+          });
           return;
         }
 
@@ -62,9 +64,7 @@ class App extends Component<{}, ConsoleState> {
       return null;
     }
 
-    return (
-      <div style={{ backgroundColor: "pink" }}>Error: {this.state.loadErr}</div>
-    );
+    return <div style={{ backgroundColor: "pink" }}>{this.state.loadErr}</div>;
   };
 
   renderResponse = () => {
