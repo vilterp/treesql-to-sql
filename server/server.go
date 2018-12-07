@@ -29,6 +29,7 @@ func NewServer(connParams string) (*Server, error) {
 	}
 
 	mux.Handle("/query", http.HandlerFunc(s.serveSQL))
+	mux.Handle("/", http.FileServer(http.Dir("ui/build")))
 
 	return s, nil
 }
