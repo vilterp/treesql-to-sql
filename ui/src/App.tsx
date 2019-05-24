@@ -35,7 +35,7 @@ class App extends Component<{}, ConsoleState> {
       loading: true,
     }));
     const startTime = DateTime.local();
-    fetch("http://localhost:9000/query", {
+    fetch(`http://${window.location.host}/query`, {
       method: "POST",
       body: this.state.query,
     })

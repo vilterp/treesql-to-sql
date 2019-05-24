@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+
 	"github.com/gobuffalo/envy"
 	"github.com/vilterp/treesql-to-sql/server"
 	"github.com/vilterp/treesql-to-sql/util"
-	"log"
-	"net/http"
 )
 
 func main() {
-	connParams := envy.Get("CONN_PARAMS", "user=root dbname=management_console_dev sslmode=disable port=26257")
+	connParams := envy.Get("CONN_PARAMS", "user=root dbname=management_console_production sslmode=disable port=26257")
 
 	host := envy.Get("HOST", "0.0.0.0")
-	port := envy.Get("PORT", "9000")
+	port := envy.Get("PORT", "9001")
 	addr := fmt.Sprintf("%s:%s", host, port)
 
 	s, err := server.NewServer(connParams)
@@ -26,4 +27,3 @@ func main() {
 		log.Fatal(err)
 	}
 }
-

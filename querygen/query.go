@@ -3,7 +3,7 @@ package querygen
 import (
 	"sort"
 
-	pp "github.com/cockroachlabs/management-console/util/prettyprint"
+	pp "github.com/vilterp/treesql-to-sql/prettyprint"
 )
 
 type Node struct {

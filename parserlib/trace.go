@@ -3,7 +3,7 @@ package parserlib
 import (
 	"fmt"
 
-	pp "github.com/vilterp/treesql/pkg/prettyprint"
+	pp "github.com/vilterp/treesql-to-sql/prettyprint"
 )
 
 type TraceTree struct {
