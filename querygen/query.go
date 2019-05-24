@@ -3,7 +3,7 @@ package querygen
 import (
 	"sort"
 
-	pp "github.com/vilterp/treesql-to-sql/prettyprint"
+	pp "github.com/vilterp/go-pretty-print"
 )
 
 type Node struct {

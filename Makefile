@@ -3,7 +3,7 @@ ui:
 	cd ui && yarn build
 
 .PHONY: run
-run: ui
+run:
 	go run main.go
 
 .PHONY: test
