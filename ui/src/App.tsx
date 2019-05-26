@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { ObjectInspector } from "react-inspector";
+import JSONViewer from "react-json-viewer";
 import { DateTime, Duration, DurationUnit } from "luxon";
 
 import "./App.css";
@@ -105,7 +106,8 @@ class App extends Component<{}, ConsoleState> {
             `${this.state.responseTime.as("milliseconds")}ms`
           : null}
         <pre>{this.state.response.SQL}</pre>
-        <ObjectInspector data={JSON.parse(this.state.response.Res)} />
+        <JSONViewer json={JSON.parse(this.state.response.Res)} />
+        {/*<ObjectInspector data={JSON.parse(this.state.response.Res)} />*/}
       </>
     );
   };
