@@ -60,6 +60,7 @@ class App extends Component<{}, ConsoleState> {
         res.json().then(jsonRes => {
           this.setState(prevState => ({
             ...prevState,
+            query: jsonRes.FormattedTreeSQL,
             loading: false,
             loadErr: null,
             response: jsonRes,

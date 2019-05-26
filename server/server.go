@@ -91,8 +91,9 @@ func (qe *queryError) Error() string {
 }
 
 type QueryResult struct {
-	Res string
-	SQL string
+	Res              string
+	SQL              string
+	FormattedTreeSQL string
 }
 
 func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
@@ -120,8 +121,9 @@ func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
 	}
 
 	return &QueryResult{
-		Res: out,
-		SQL: sqlQuery,
+		Res:              out,
+		SQL:              sqlQuery,
+		FormattedTreeSQL: stmt.Pretty().String(),
 	}, nil
 }
 
