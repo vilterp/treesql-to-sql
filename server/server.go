@@ -8,16 +8,16 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/vilterp/treesql-to-sql/querygen"
-
-	"github.com/vilterp/treesql-to-sql/parse"
-
 	_ "github.com/lib/pq"
+	"github.com/vilterp/treesql-to-sql/parse"
+	"github.com/vilterp/treesql-to-sql/querygen"
+	"github.com/vilterp/treesql-to-sql/schema"
 )
 
 type Server struct {
-	conn *sql.DB
-	mux  *http.ServeMux
+	conn   *sql.DB
+	mux    *http.ServeMux
+	schema schema.Schema
 }
 
 func NewServer(connParams string) (*Server, error) {
@@ -26,11 +26,17 @@ func NewServer(connParams string) (*Server, error) {
 		return nil, err
 	}
 
+	dbSchema, err := schema.LoadSchema(conn)
+	if err != nil {
+		return nil, err
+	}
+
 	mux := http.NewServeMux()
 
 	s := &Server{
-		conn: conn,
-		mux:  mux,
+		conn:   conn,
+		mux:    mux,
+		schema: dbSchema,
 	}
 
 	mux.Handle("/query", http.HandlerFunc(s.serveSQL))
@@ -96,7 +102,7 @@ func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
 		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("parse error: %v", err))
 	}
 
-	sqlQuery, err := querygen.Generate(stmt.Select)
+	sqlQuery, err := querygen.Generate(stmt.Select, s.schema)
 	if err != nil {
 		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("generating query: %v", err.Error()))
 	}

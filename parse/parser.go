@@ -59,7 +59,7 @@ type Update struct {
 type Select struct {
 	Many       bool               `( @"MANY"`
 	One        bool               `| @"ONE" )`
-	Table      string             `@Ident`
+	TableName  string             `@Ident`
 	Where      *Where             `[ "WHERE" @@ ]`
 	Selections []*SelectionOrStar `"{" @@ { "," @@ } "}"` // TODO: * for all columns
 	Live       bool               `[ @"LIVE" ]`           // would put this at the beginning but it seems to cause indeterminancy

@@ -57,7 +57,7 @@ func (n *Select) Format() string {
 	} else {
 		buf.WriteString("ONE ")
 	}
-	buf.WriteString(n.Table)
+	buf.WriteString(n.TableName)
 	if n.Where != nil {
 		buf.WriteString(" WHERE ")
 		buf.WriteString(n.Where.ColumnName)
