@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import { ObjectInspector } from "react-inspector";
 import JSONViewer from "react-json-viewer";
 import { DateTime, Duration, DurationUnit } from "luxon";
-
+import AceEditor from "react-ace";
 import "./App.css";
 
 interface ConsoleState {
@@ -106,8 +105,11 @@ class App extends Component<{}, ConsoleState> {
             `${this.state.responseTime.as("milliseconds")}ms`
           : null}
         <pre>{this.state.response.SQL}</pre>
-        <JSONViewer json={JSON.parse(this.state.response.Res)} />
+        {/*<JSONViewer json={JSON.parse(this.state.response.Res)} />*/}
         {/*<ObjectInspector data={JSON.parse(this.state.response.Res)} />*/}
+        <pre>
+          {JSON.stringify(JSON.parse(this.state.response.Res), null, 2)}
+        </pre>
       </>
     );
   };
@@ -116,12 +118,10 @@ class App extends Component<{}, ConsoleState> {
     return (
       <div className="App">
         <h1>Console</h1>
-        <textarea
-          style={{ fontFamily: "monospace" }}
-          rows={20}
-          cols={50}
+        <AceEditor
           value={this.state.query}
-          onChange={evt => this.handleUpdateQuery(evt.target.value)}
+          height="300px"
+          onChange={value => this.handleUpdateQuery(value)}
         />
         <br />
         <button onClick={this.handleSubmit} disabled={this.state.loading}>
