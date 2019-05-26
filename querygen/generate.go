@@ -72,7 +72,8 @@ func generate(stmt *parse.Select, schema schema.Schema, outerTable *schema.Table
 	if stmt.Where != nil {
 		docs = append(
 			docs, pp.Newline, pp.Text("WHERE "),
-			pp.Text(stmt.Where.ColumnName), pp.Text(" = "), pp.Text(stmt.Where.Value),
+			// TODO(vilterp): actually escape this
+			pp.Text(stmt.Where.ColumnName), pp.Text(" = "), pp.Textf(`'%s'`, stmt.Where.Value),
 		)
 	}
 	if outerTable != nil {

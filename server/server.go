@@ -108,6 +108,8 @@ func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
 		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("generating query: %v", err.Error()))
 	}
 
+	log.Println(sqlQuery)
+
 	rows, err := s.conn.Query(string(sqlQuery))
 	if err != nil {
 		log.Println("error running query:", err)

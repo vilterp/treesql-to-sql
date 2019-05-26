@@ -1,7 +1,8 @@
 import React, { Component } from "react";
-import JSONViewer from "react-json-viewer";
-import { DateTime, Duration, DurationUnit } from "luxon";
+import { DateTime, Duration } from "luxon";
 import AceEditor from "react-ace";
+import "brace";
+import "brace/mode/json";
 import "./App.css";
 
 interface ConsoleState {
@@ -98,6 +99,12 @@ class App extends Component<{}, ConsoleState> {
       return null;
     }
 
+    const stringified = JSON.stringify(
+      JSON.parse(this.state.response.Res),
+      null,
+      2,
+    );
+
     return (
       <>
         {this.state.responseTime
@@ -107,9 +114,20 @@ class App extends Component<{}, ConsoleState> {
         <pre>{this.state.response.SQL}</pre>
         {/*<JSONViewer json={JSON.parse(this.state.response.Res)} />*/}
         {/*<ObjectInspector data={JSON.parse(this.state.response.Res)} />*/}
-        <pre>
-          {JSON.stringify(JSON.parse(this.state.response.Res), null, 2)}
-        </pre>
+        {/*<pre>*/}
+        {/*  {JSON.stringify(JSON.parse(this.state.response.Res), null, 2)}*/}
+        {/*</pre>*/}
+        <AceEditor
+          value={stringified}
+          mode="json"
+          readOnly={true}
+          maxLines={Infinity}
+          highlightActiveLine={false}
+          setOptions={{
+            showLineNumbers: false,
+            highlightGutterLine: false,
+          }}
+        />
       </>
     );
   };
@@ -117,11 +135,18 @@ class App extends Component<{}, ConsoleState> {
   render() {
     return (
       <div className="App">
-        <h1>Console</h1>
+        <h1>TreeSQL Console</h1>
         <AceEditor
           value={this.state.query}
           height="300px"
           onChange={value => this.handleUpdateQuery(value)}
+          highlightActiveLine={false}
+          showGutter={false}
+          setOptions={{
+            showLineNumbers: false,
+            highlightGutterLine: false,
+            tabSize: 2,
+          }}
         />
         <br />
         <button onClick={this.handleSubmit} disabled={this.state.loading}>
