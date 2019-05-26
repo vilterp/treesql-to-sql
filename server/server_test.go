@@ -17,7 +17,7 @@ func TestServer(t *testing.T) {
 	ts := httptest.NewServer(util.Logger(s))
 
 	body := strings.NewReader("MANY clusters { id }")
-	resp, err := ts.Client().Post(ts.URL+"/query", "application/x-sql", body)
+	resp, err := ts.Client().Post(ts.URL+"/query", "application/x-SQL", body)
 	assert.NoError(t, err)
 
 	assert.Equal(t, 200, resp.StatusCode)

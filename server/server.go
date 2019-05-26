@@ -1,8 +1,8 @@
 package server
 
 import (
-	"bufio"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -49,46 +49,74 @@ func (s *Server) serveSQL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	out, qErr := s.runQuery(string(query))
+	if qErr != nil {
+		// wtf, why does this not let me get the code
+		http.Error(w, qErr.Error(), qErr.code)
+		log.Println("error running query:", qErr.Error())
+		return
+	}
+
+	log.Println(out.SQL)
+
+	// TODO(vilterp): isn't there a stdlib method that just writes an entire string to a writer? jeez.
+	encoder := json.NewEncoder(w)
+	if err := encoder.Encode(out); err != nil {
+		log.Println("error writing result:", err)
+		w.WriteHeader(500)
+		return
+	}
+}
+
+type queryError struct {
+	msg  string
+	code int
+}
+
+func mkQueryError(code int, msg string) *queryError {
+	return &queryError{
+		msg:  msg,
+		code: code,
+	}
+}
+
+func (qe *queryError) Error() string {
+	return qe.msg
+}
+
+type QueryResult struct {
+	Res string
+	SQL string
+}
+
+func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
 	stmt, err := parse.Parse(string(query))
 	if err != nil {
 		log.Println("parse error", err)
-		w.Write([]byte(fmt.Sprintf("parse error: %v", err)))
-		http.Error(w, fmt.Sprintf("parse error"), http.StatusBadRequest)
+		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("parse error: %v", err))
 	}
 
-	sqlQuery := querygen.Generate(stmt.Select)
+	sqlQuery, err := querygen.Generate(stmt.Select)
+	if err != nil {
+		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("generating query: %v", err.Error()))
+	}
 
 	rows, err := s.conn.Query(string(sqlQuery))
 	if err != nil {
 		log.Println("error running query:", err)
-		w.WriteHeader(http.StatusBadRequest)
-		// TODO(vilterp): return this as JSON
-		if _, err := w.Write([]byte(fmt.Sprintf("error running query: %v", err))); err != nil {
-			log.Println("error writing error:", err)
-		}
-		return
+		return nil, mkQueryError(http.StatusInternalServerError, fmt.Sprintf("running query: %v", err.Error()))
 	}
 
 	var out string
 	rows.Next()
 	if err := rows.Scan(&out); err != nil {
-		log.Println("error scanning rows:", err)
-		w.WriteHeader(500)
-		return
+		return nil, mkQueryError(http.StatusInternalServerError, fmt.Sprintf("scanning rows: %v", err.Error()))
 	}
 
-	// TODO(vilterp): isn't there a stdlib method that just writes an entire string to a writer? jeez.
-	b := bufio.NewWriter(w)
-	if _, err := b.WriteString(out); err != nil {
-		log.Println("error writing result:", err)
-		w.WriteHeader(500)
-		return
-	}
-	if err := b.Flush(); err != nil {
-		log.Println("error writing result:", err)
-		w.WriteHeader(500)
-		return
-	}
+	return &QueryResult{
+		Res: out,
+		SQL: sqlQuery,
+	}, nil
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {

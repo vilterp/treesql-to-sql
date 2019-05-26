@@ -9,8 +9,13 @@ interface ConsoleState {
   // TODO(vilterp): unify these into an API call state thing
   loading: boolean;
   loadErr: string | null;
-  response: string | null;
+  response: Resp | null;
   responseTime: Duration | null;
+}
+
+interface Resp {
+  Res: string;
+  SQL: string;
 }
 
 class App extends Component<{}, ConsoleState> {
@@ -76,7 +81,11 @@ class App extends Component<{}, ConsoleState> {
       return null;
     }
 
-    return <div style={{ backgroundColor: "pink" }}>{this.state.loadErr}</div>;
+    return (
+      <div style={{ backgroundColor: "pink", fontFamily: "monospace" }}>
+        {this.state.loadErr}
+      </div>
+    );
   };
 
   renderResponse = () => {
@@ -94,7 +103,8 @@ class App extends Component<{}, ConsoleState> {
           ? // jesus christ Luxon; why can't you be the same as Go's time.Duration??
             `${this.state.responseTime.as("milliseconds")}ms`
           : null}
-        <ObjectInspector data={this.state.response} />
+        <pre>{this.state.response.SQL}</pre>
+        <ObjectInspector data={JSON.parse(this.state.response.Res)} />
       </>
     );
   };
