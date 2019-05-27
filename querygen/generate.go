@@ -76,21 +76,38 @@ func generate(stmt *parse.Select, schema schema.Schema, outerTable *schema.Table
 			pp.Text(stmt.Where.ColumnName), pp.Text(" = "), pp.Textf(`'%s'`, stmt.Where.Value),
 		)
 	}
+	// join
+	// TODO(vilterp): actually get PK col name
+	//   need to get this in schema package
 	if outerTable != nil {
 		if stmt.Where != nil {
 			return nil, fmt.Errorf("WHERE and outerTable both set")
 		}
-		refCol, err := curTable.FindColPointingAt(outerTable.Table.TableName)
-		if err != nil {
-			return nil, err
+		if stmt.One {
+			// outer table pointing at this
+			refCol, err := outerTable.FindColPointingAt(curTable.Table.TableName)
+			if err != nil {
+				return nil, err
+			}
+			docs = append(
+				docs, pp.Newline, pp.Text("WHERE "),
+				pp.Textf("%s.%s", outerTable.Table.TableName, refCol),
+				pp.Text(" = "),
+				pp.Textf("%s.%s", curTable.Table.TableName, "id"),
+			)
+		} else {
+			// this pointing at outer table
+			refCol, err := curTable.FindColPointingAt(outerTable.Table.TableName)
+			if err != nil {
+				return nil, err
+			}
+			docs = append(
+				docs, pp.Newline, pp.Text("WHERE "),
+				pp.Textf("%s.%s", curTable.Table.TableName, refCol),
+				pp.Text(" = "),
+				pp.Textf("%s.%s", outerTable.Table.TableName, "id"),
+			)
 		}
-		docs = append(
-			docs, pp.Newline, pp.Text("WHERE "),
-			pp.Textf("%s.%s", curTable.Table.TableName, refCol),
-			pp.Text(" = "),
-			// TODO(vilterp): actually get PK col name
-			pp.Textf("%s.%s", outerTable.Table.TableName, "id"),
-		)
 	}
 	//if stmt.OrderByClause != "" {
 	//	docs = append(docs, pp.Newline, pp.Text("ORDER BY "), pp.Text(stmt.OrderByClause))

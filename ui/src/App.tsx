@@ -78,6 +78,31 @@ class App extends Component<{}, ConsoleState> {
       });
   };
 
+  renderEditor = () => {
+    return (
+      <>
+        <div style={{ border: "1px solid black" }}>
+          <AceEditor
+            value={this.state.query}
+            height="300px"
+            onChange={value => this.handleUpdateQuery(value)}
+            highlightActiveLine={false}
+            showGutter={false}
+            setOptions={{
+              showLineNumbers: false,
+              highlightGutterLine: false,
+              tabSize: 2,
+            }}
+          />
+        </div>
+        <br />
+        <button onClick={this.handleSubmit} disabled={this.state.loading}>
+          Run
+        </button>
+      </>
+    );
+  };
+
   renderError = () => {
     if (!this.state.loadErr) {
       return null;
@@ -136,22 +161,7 @@ class App extends Component<{}, ConsoleState> {
     return (
       <div className="App">
         <h1>TreeSQL Console</h1>
-        <AceEditor
-          value={this.state.query}
-          height="300px"
-          onChange={value => this.handleUpdateQuery(value)}
-          highlightActiveLine={false}
-          showGutter={false}
-          setOptions={{
-            showLineNumbers: false,
-            highlightGutterLine: false,
-            tabSize: 2,
-          }}
-        />
-        <br />
-        <button onClick={this.handleSubmit} disabled={this.state.loading}>
-          Run
-        </button>
+        {this.renderEditor()}
         <br />
         {this.renderError()}
         {this.renderResponse()}
