@@ -10,6 +10,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"github.com/vilterp/treesql-to-sql/live_queries"
 	"github.com/vilterp/treesql-to-sql/parse"
 	"github.com/vilterp/treesql-to-sql/querygen"
 	"github.com/vilterp/treesql-to-sql/schema"
@@ -31,6 +32,12 @@ func NewServer(connParams string) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println("creating live query schema...")
+	if err := live_queries.CreateSchema(conn); err != nil {
+		return nil, err
+	}
+	log.Println("created live query schema")
 
 	mux := http.NewServeMux()
 
