@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/vilterp/treesql-to-sql/parse"
@@ -63,8 +64,6 @@ func (s *Server) serveSQL(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Println(out.SQL)
-
 	// TODO(vilterp): isn't there a stdlib method that just writes an entire string to a writer? jeez.
 	encoder := json.NewEncoder(w)
 	if err := encoder.Encode(out); err != nil {
@@ -108,13 +107,14 @@ func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
 		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("generating query: %v", err.Error()))
 	}
 
-	log.Println(sqlQuery)
-
+	queryStartTime := time.Now()
 	rows, err := s.conn.Query(string(sqlQuery))
+	queryEndTime := time.Now()
 	if err != nil {
 		log.Println("error running query:", err)
 		return nil, mkQueryError(http.StatusInternalServerError, fmt.Sprintf("running query: %v", err.Error()))
 	}
+	log.Println("query time:", queryEndTime.Sub(queryStartTime))
 
 	var out string
 	rows.Next()
