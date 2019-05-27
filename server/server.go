@@ -50,6 +50,17 @@ func NewServer(connParams string) (*Server, error) {
 	mux.Handle("/query", http.HandlerFunc(s.serveSQL))
 	mux.Handle("/", http.FileServer(http.Dir("ui/build")))
 
+	events, err := live_queries.LiveQuery(conn, dbSchema)
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		for {
+			evt := <-events
+			log.Printf("changefeed event %#v", evt)
+		}
+	}()
+
 	return s, nil
 }
 
