@@ -6,22 +6,18 @@ import (
 )
 
 var (
-	sqlLexer = lexer.Unquote(
-		lexer.Upper(
-			lexer.Must(
-				lexer.Regexp(`(\s+)`+
-					`|(?P<Keyword>(?i)LIVE|SELECT|INSERT|INTO|VALUES|CREATETABLE|PRIMARYKEY|REFERENCESTABLE|UPDATE|SET|ONE|MANY|FROM|TOP|DISTINCT|ALL|WHERE|GROUP|BY|HAVING|UNION|MINUS|EXCEPT|INTERSECT|ORDER|LIMIT|OFFSET|TRUE|FALSE|NULL|IS|NOT|ANY|SOME|BETWEEN|AND|LIKE|AS)`+
-					`|(?P<Ident>[a-zA-Z_][a-zA-Z0-9_]*)`+
-					`|(?P<Number>[-+]?\d*\.?\d+([eE][-+]?\d+)?)`+
-					`|(?P<String>'[^']*'|"[^"]*")`+
-					`|(?P<Operators><>|!=|<=|>=|[-+*/%,.()\{\}=<>:])`,
-				),
+	sqlLexer = participle.Lexer(
+		lexer.Must(
+			lexer.Regexp(`(\s+)` +
+				`|(?P<Keyword>(?i)LIVE|SELECT|INSERT|INTO|VALUES|CREATETABLE|PRIMARYKEY|REFERENCESTABLE|UPDATE|SET|ONE|MANY|FROM|TOP|DISTINCT|ALL|WHERE|GROUP|BY|HAVING|UNION|MINUS|EXCEPT|INTERSECT|ORDER|LIMIT|OFFSET|TRUE|FALSE|NULL|IS|NOT|ANY|SOME|BETWEEN|AND|LIKE|AS)` +
+				`|(?P<Ident>[a-zA-Z_][a-zA-Z0-9_]*)` +
+				`|(?P<Number>[-+]?\d*\.?\d+([eE][-+]?\d+)?)` +
+				`|(?P<String>'[^']*'|"[^"]*")` +
+				`|(?P<Operators><>|!=|<=|>=|[-+*/%,.()\{\}=<>:])`,
 			),
-			"Keyword",
 		),
-		"String",
 	)
-	sqlParser = participle.MustBuild(&Statement{}, sqlLexer)
+	sqlParser = participle.MustBuild(&Statement{}, sqlLexer, participle.Unquote("String"))
 )
 
 type Statement struct {
