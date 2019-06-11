@@ -14,11 +14,17 @@ type Event struct {
 	Value string
 }
 
-func LiveQuery(conn *sql.DB, schema schema2.Schema) (chan *Event, error) {
+func LiveQuery(conn *sql.DB, dbSchema schema2.Schema) (chan *Event, error) {
+	res := conn.QueryRow("SELECT cluster_logical_timestamp()")
+	var timestamp string
+	if err := res.Scan(&timestamp); err != nil {
+		return nil, fmt.Errorf("getting timestamp to start changefeeds: %v", err)
+	}
+
 	c := make(chan *Event)
-	for tableName := range schema {
+	for tableName := range dbSchema {
 		go func() {
-			res, err := conn.Query(fmt.Sprintf("CREATE CHANGEFEED FOR TABLE %s", tableName))
+			res, err := conn.Query(fmt.Sprintf("CREATE CHANGEFEED FOR TABLE %s WITH cursor = '%s'", tableName, timestamp))
 			if err != nil {
 				log.Printf("creating changefeed for table %s: %v", tableName, err)
 			}
@@ -32,5 +38,6 @@ func LiveQuery(conn *sql.DB, schema schema2.Schema) (chan *Event, error) {
 			}
 		}()
 	}
+	log.Printf("opened changefeeds for %d tables", len(dbSchema))
 	return c, nil
 }
