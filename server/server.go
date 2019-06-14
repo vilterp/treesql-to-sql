@@ -9,9 +9,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/vilterp/go-parserlib/pkg/psi"
+
 	_ "github.com/lib/pq"
+	"github.com/vilterp/go-parserlib/examples/treesql"
 	"github.com/vilterp/treesql-to-sql/live_queries"
-	"github.com/vilterp/treesql-to-sql/parse"
 	"github.com/vilterp/treesql-to-sql/querygen"
 	"github.com/vilterp/treesql-to-sql/schema"
 )
@@ -114,16 +116,23 @@ type QueryResult struct {
 }
 
 func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
-	stmt, err := parse.Parse(string(query))
+	plLang := treesql.MakeLanguage(s.schemaForLanguage())
+
+	psiTree, err := psi.Parse(plLang, query)
 	if err != nil {
-		log.Println("parse error", err)
-		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("parse error: %v", err))
+		log.Println("parse error:", err)
+		return nil, &queryError{
+			code: http.StatusBadRequest,
+			msg:  fmt.Sprintf("parse error: %v", err),
+		}
 	}
 
-	sqlQuery, err := querygen.Generate(stmt.Select, s.schema)
+	sqlQuery, err := querygen.Generate(psiTree.(*treesql.Select), s.schema)
 	if err != nil {
 		return nil, mkQueryError(http.StatusBadRequest, fmt.Sprintf("generating query: %v", err.Error()))
 	}
+
+	log.Println("SQL query", sqlQuery)
 
 	queryStartTime := time.Now()
 	rows, err := s.conn.Query(string(sqlQuery))
@@ -141,10 +150,24 @@ func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
 	}
 
 	return &QueryResult{
-		Res:              out,
-		SQL:              sqlQuery,
-		FormattedTreeSQL: stmt.Pretty().String(),
+		Res: out,
+		SQL: sqlQuery,
+		//FormattedTreeSQL: stmt.Pretty().String(),
 	}, nil
+}
+
+func (s *Server) schemaForLanguage() *treesql.SchemaDesc {
+	sd := &treesql.SchemaDesc{
+		Tables: map[string]*treesql.TableDesc{},
+	}
+	for name, table := range s.schema {
+		tbl := &treesql.TableDesc{
+			Columns: map[string]*treesql.ColDesc{},
+		}
+		fmt.Println(table) // ugh why does this not have columns
+		sd.Tables[name] = tbl
+	}
+	return sd
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
