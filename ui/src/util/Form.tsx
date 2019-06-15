@@ -7,9 +7,12 @@ export type UpdaterFn<State> = (updater: UpdateFn<State>) => void;
 
 // TODO(vilterp): some way of focusing on mount
 
-interface FormProps<State, Response> {
-  render: (props: FormRenderProps<State, Response>) => React.ReactNode;
+interface FormProps<State, Response, ValidationResponse> {
+  render: (
+    props: FormRenderProps<State, Response, ValidationResponse>,
+  ) => React.ReactNode;
   submit: (state: State) => Promise<Response>;
+  validate?: (state: State) => Promise<ValidationResponse>;
   initialState: State;
   onSucceed?: (
     r: Response,
@@ -17,35 +20,59 @@ interface FormProps<State, Response> {
   ) => void;
 }
 
-interface FormState<State, Response> {
+interface FormState<State, Response, ValidationResponse> {
   formState: State;
+  validationState: ValidationState<ValidationResponse>; // TODO: track whether this is up to date
   apiCallState: APICallState<Response, string>;
 }
 
-interface FormRenderProps<State, Response> {
+type ValidationState<VResp> =
+  | { tag: "NEVER_VALIDATED" }
+  | { tag: "VALIDATING" }
+  | { tag: "VALIDATED"; resp: VResp };
+
+interface FormRenderProps<State, Response, ValidationResponse> {
   state: State;
   update: UpdaterFn<State>;
   apiCallState: APICallState<Response, string>;
+  validationState: ValidationState<ValidationResponse>;
 }
 
-export default class Form<S, R> extends React.Component<
-  FormProps<S, R>,
-  FormState<S, R>
-  > {
-  constructor(props: FormProps<S, R>) {
+export default class Form<S, R, V = {}> extends React.Component<
+  FormProps<S, R, V>,
+  FormState<S, R, V>
+> {
+  constructor(props: FormProps<S, R, V>) {
     super(props);
     this.state = {
       formState: props.initialState,
+      validationState: { tag: "NEVER_VALIDATED" },
       apiCallState: { tag: State.NOT_TRIED_YET },
     };
   }
 
   handleFormUpdate = (updater: UpdateFn<S>) => {
-    this.setState(prevState => ({
-      ...prevState,
-      formState: updater(prevState.formState),
-    }));
+    const newState = updater(this.state.formState);
+    this.setState({
+      ...this.state,
+      formState: newState,
+    });
+
+    this.doValidation(newState);
   };
+
+  doValidation(newState: S) {
+    if (this.props.validate) {
+      this.setState({
+        validationState: { tag: "VALIDATING" },
+      });
+      this.props.validate(newState).then(valResp => {
+        this.setState({
+          validationState: { tag: "VALIDATED", resp: valResp },
+        });
+      });
+    }
+  }
 
   handleSubmit = (evt: FormEvent) => {
     evt.preventDefault();
@@ -82,6 +109,7 @@ export default class Form<S, R> extends React.Component<
           state: this.state.formState,
           update: this.handleFormUpdate,
           apiCallState: this.state.apiCallState,
+          validationState: this.state.validationState,
         })}
       </form>
     );

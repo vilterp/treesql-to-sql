@@ -9,7 +9,7 @@ require (
 	github.com/lib/pq v1.1.1
 	github.com/sergi/go-diff v1.0.0 // indirect
 	github.com/stretchr/testify v1.3.0
-	github.com/vilterp/go-parserlib v0.0.0-20190614223409-25856ffefcff
+	github.com/vilterp/go-parserlib v0.0.0-20190615185554-cccd0a8ea867
 	github.com/vilterp/go-pretty-print v0.0.0-20190524213027-fc66832e8927
 	github.com/xo/xo v0.0.0-20190105221319-1a94fa516029
 )

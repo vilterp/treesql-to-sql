@@ -48,6 +48,16 @@ github.com/vilterp/go-parserlib v0.0.0-20190614035046-bbaa47721b93 h1:aIfMltX0dp
 github.com/vilterp/go-parserlib v0.0.0-20190614035046-bbaa47721b93/go.mod h1:WxbzOBOpxuPv+lFTHaZRWj1NTU4UgSZGSMRKHFXbpBw=
 github.com/vilterp/go-parserlib v0.0.0-20190614223409-25856ffefcff h1:SnvEnC58lUXauLa7UjfxRGtP6hOTh9J8bnazuHXTdeE=
 github.com/vilterp/go-parserlib v0.0.0-20190614223409-25856ffefcff/go.mod h1:WxbzOBOpxuPv+lFTHaZRWj1NTU4UgSZGSMRKHFXbpBw=
+github.com/vilterp/go-parserlib v0.0.0-20190615174551-a389cd5bbe53 h1:g/Gwi/CcPm2MItwBjIsqI+Jj1QeAEcHQ2O0tdshddRE=
+github.com/vilterp/go-parserlib v0.0.0-20190615174551-a389cd5bbe53/go.mod h1:WxbzOBOpxuPv+lFTHaZRWj1NTU4UgSZGSMRKHFXbpBw=
+github.com/vilterp/go-parserlib v0.0.0-20190615182721-0e0b6356e450 h1:DoaZQJoZToIMe8yR7ALCZ6WHZ+uI4i1TWHnitseLoi4=
+github.com/vilterp/go-parserlib v0.0.0-20190615182721-0e0b6356e450/go.mod h1:WxbzOBOpxuPv+lFTHaZRWj1NTU4UgSZGSMRKHFXbpBw=
+github.com/vilterp/go-parserlib v0.0.0-20190615184103-d4deaa21c5c8 h1:GCmHrencSG7qa/z9tOZS8jHLZAbH9HO5S9LWtMDlg90=
+github.com/vilterp/go-parserlib v0.0.0-20190615184103-d4deaa21c5c8/go.mod h1:WxbzOBOpxuPv+lFTHaZRWj1NTU4UgSZGSMRKHFXbpBw=
+github.com/vilterp/go-parserlib v0.0.0-20190615184508-ccd4ae79314c h1:ohlNbQNmtbeyQSZCt08+HxcOHHqi2LJ5L7nBJCtjqWw=
+github.com/vilterp/go-parserlib v0.0.0-20190615184508-ccd4ae79314c/go.mod h1:WxbzOBOpxuPv+lFTHaZRWj1NTU4UgSZGSMRKHFXbpBw=
+github.com/vilterp/go-parserlib v0.0.0-20190615185554-cccd0a8ea867 h1:RpidqPYVxvWeyxkRIMXkmsDPCe1K1rFg4sHTUfCTfzA=
+github.com/vilterp/go-parserlib v0.0.0-20190615185554-cccd0a8ea867/go.mod h1:WxbzOBOpxuPv+lFTHaZRWj1NTU4UgSZGSMRKHFXbpBw=
 github.com/vilterp/go-pretty-print v0.0.0-20190524213027-fc66832e8927 h1:PANkRWv26+qwCcV2ORbftbUTFSlymtg6a5RYoBdsKYE=
 github.com/vilterp/go-pretty-print v0.0.0-20190524213027-fc66832e8927/go.mod h1:1W25TC8at3m5sw6sESGa7vDiMO+QIQ4TFiRRr4s6XSQ=
 github.com/xo/dburl v0.0.0-20181118001949-f3ca07bd6afc/go.mod h1:g6rdekR8vgfVZrkLWfobLTm0kVez7GAN23mWtkGCJ14=

@@ -2,8 +2,6 @@ import * as React from "react";
 import { Alert, AlertType } from "./alert";
 import { APICallState, State } from "./apiCallState";
 
-import "./load.scss";
-
 interface LoadProps<T> {
   load: () => Promise<T>;
   render: (props: LoadRenderProps<T>) => React.ReactNode;
@@ -49,11 +47,7 @@ class Load<T> extends React.Component<LoadProps<T>, LoadState<T>> {
     switch (this.state.apiCallState.tag) {
       case State.LOADING:
       case State.NOT_TRIED_YET:
-        return (
-          <div className="loading">
-            Loading...
-          </div>
-        );
+        return <div className="loading">Loading...</div>;
       case State.FAILED:
         return (
           <Alert

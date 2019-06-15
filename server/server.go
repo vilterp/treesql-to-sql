@@ -9,8 +9,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vilterp/go-parserlib/pkg/psi"
-
 	_ "github.com/lib/pq"
 	"github.com/vilterp/go-parserlib/examples/treesql"
 	"github.com/vilterp/treesql-to-sql/live_queries"
@@ -50,6 +48,8 @@ func NewServer(connParams string) (*Server, error) {
 	}
 
 	mux.Handle("/query", http.HandlerFunc(s.serveSQL))
+	mux.Handle("/schema", http.HandlerFunc(s.serveSchema))
+	mux.Handle("/validate", http.HandlerFunc(s.serveValidate))
 	mux.Handle("/", http.FileServer(http.Dir("ui/build")))
 
 	events, err := live_queries.LiveQuery(conn, dbSchema)
@@ -118,7 +118,7 @@ type QueryResult struct {
 func (s *Server) runQuery(query string) (*QueryResult, *queryError) {
 	plLang := treesql.MakeLanguage(s.schemaForLanguage())
 
-	psiTree, err := psi.Parse(plLang, query)
+	psiTree, err := plLang.Parse(query)
 	if err != nil {
 		log.Println("parse error:", err)
 		return nil, &queryError{
@@ -160,14 +160,29 @@ func (s *Server) schemaForLanguage() *treesql.SchemaDesc {
 	sd := &treesql.SchemaDesc{
 		Tables: map[string]*treesql.TableDesc{},
 	}
-	for name, table := range s.schema {
+	for name := range s.schema {
 		tbl := &treesql.TableDesc{
 			Columns: map[string]*treesql.ColDesc{},
 		}
-		fmt.Println(table) // ugh why does this not have columns
 		sd.Tables[name] = tbl
 	}
 	return sd
+}
+
+func (s *Server) serveSchema(w http.ResponseWriter, req *http.Request) {
+	schemaDesc := s.schemaForLanguage()
+	bytes, err := json.Marshal(schemaDesc)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	if _, err := w.Write(bytes); err != nil {
+		log.Println(err)
+	}
+}
+
+func (s *Server) serveValidate(w http.ResponseWriter, req *http.Request) {
+	l := treesql.MakeLanguage(s.schemaForLanguage())
+	l.ServeCompletions(w, req)
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
