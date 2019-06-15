@@ -28,7 +28,7 @@ interface FormState<State, Response, ValidationResponse> {
 
 type ValidationState<VResp> =
   | { tag: "NEVER_VALIDATED" }
-  | { tag: "VALIDATING" }
+  | { tag: "VALIDATING"; resp: VResp | null }
   | { tag: "VALIDATED"; resp: VResp };
 
 interface FormRenderProps<State, Response, ValidationResponse> {
@@ -51,6 +51,10 @@ export default class Form<S, R, V = {}> extends React.Component<
     };
   }
 
+  componentDidMount(): void {
+    this.doValidation(this.state.formState);
+  }
+
   handleFormUpdate = (updater: UpdateFn<S>) => {
     const newState = updater(this.state.formState);
     this.setState({
@@ -64,7 +68,13 @@ export default class Form<S, R, V = {}> extends React.Component<
   doValidation(newState: S) {
     if (this.props.validate) {
       this.setState({
-        validationState: { tag: "VALIDATING" },
+        validationState: {
+          tag: "VALIDATING",
+          resp:
+            this.state.validationState.tag === "VALIDATED"
+              ? this.state.validationState.resp
+              : null,
+        },
       });
       this.props.validate(newState).then(valResp => {
         this.setState({

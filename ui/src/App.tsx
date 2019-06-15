@@ -28,11 +28,11 @@ function App() {
       <h1>TreeSQL Console</h1>
       <Load
         load={getSchema}
-        render={schemaDesc => (
+        render={({ data: schemaDesc }) => (
           <Form<AppState, Resp, ValidationResp>
             initialState={{
               cursorPos: { Line: 1, Col: 1, Offset: 1 },
-              query: `MANY posts { id, body}`,
+              query: ``,
             }}
             submit={runQuery}
             validate={st =>
@@ -44,7 +44,7 @@ function App() {
             render={({ state, update, apiCallState, validationState }) => (
               <table>
                 <tbody>
-                  <tr>
+                  <tr style={{ verticalAlign: "top" }}>
                     <td>
                       <div style={{ border: "1px solid black" }}>
                         <AceEditor
@@ -110,40 +110,60 @@ function App() {
                       ) : null}
                     </td>
                     <td>
-                      <h2>Schema</h2>
-                      {JSON.stringify(schemaDesc, null, 2)}
-                      <h2>Errors</h2>
-                      {validationState.tag === "VALIDATED" ? (
-                        <ul>
-                          {(validationState.resp.Errors || []).map(
-                            (err, idx) => (
+                      {validationState.tag === "VALIDATED" ||
+                      validationState.tag === "VALIDATING" ? (
+                        <>
+                          <h2>Schema</h2>
+                          <ul>
+                            {Object.keys(schemaDesc.Tables)
+                              .sort()
+                              .map(tableName => (
+                                <li key={tableName}>
+                                  {tableName}
+                                  <ul>
+                                    {Object.keys(
+                                      schemaDesc.Tables[tableName].Columns,
+                                    )
+                                      .sort()
+                                      .map(colName => (
+                                        <li key={colName}>{colName}</li>
+                                      ))}
+                                  </ul>
+                                </li>
+                              ))}
+                          </ul>
+                          <h2>Errors</h2>
+                          <ul>
+                            {/* TODO(vilterp): de-kludge this */}
+                            {(
+                              (validationState.resp
+                                ? validationState.resp.Errors
+                                : []) || []
+                            ).map((err, idx) => (
                               <li key={idx}>
                                 {formatSpan(err.Span)}: {err.Message}
                               </li>
-                            ),
-                          )}
-                        </ul>
-                      ) : null}
-                      <h2>Completions</h2>
-                      {validationState.tag === "VALIDATED" ? (
-                        <ul>
-                          {(validationState.resp.Completions || []).map(
-                            (comp, idx) => (
+                            ))}
+                          </ul>
+                          <h2>Completions</h2>
+                          <ul>
+                            {(
+                              (validationState.resp
+                                ? validationState.resp.Completions
+                                : []) || []
+                            ).map((comp, idx) => (
                               <li key={idx}>
                                 {comp.Kind}: {comp.Content}
                               </li>
-                            ),
-                          )}
-                        </ul>
+                            ))}
+                          </ul>
+                          <h2>Parse Error</h2>
+                          {validationState.resp &&
+                          validationState.resp.ParseError
+                            ? validationState.resp.ParseError
+                            : null}
+                        </>
                       ) : null}
-                      <h2>Parse Error</h2>
-                      {validationState.tag === "VALIDATED"
-                        ? JSON.stringify(
-                            validationState.resp.ParseError,
-                            null,
-                            2,
-                          )
-                        : null}
                     </td>
                   </tr>
                 </tbody>
