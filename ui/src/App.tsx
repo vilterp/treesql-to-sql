@@ -46,6 +46,27 @@ function App() {
                 <tbody>
                   <tr style={{ verticalAlign: "top" }}>
                     <td>
+                      <h2>Schema</h2>
+                      <ul>
+                        {Object.keys(schemaDesc.Tables)
+                          .sort()
+                          .map(tableName => (
+                            <li key={tableName}>
+                              {tableName}
+                              <ul>
+                                {Object.keys(
+                                  schemaDesc.Tables[tableName].Columns,
+                                )
+                                  .sort()
+                                  .map(colName => (
+                                    <li key={colName}>{colName}</li>
+                                  ))}
+                              </ul>
+                            </li>
+                          ))}
+                      </ul>
+                    </td>
+                    <td style={{ width: 800 }}>
                       <div style={{ border: "1px solid black" }}>
                         <AceEditor
                           value={state.query}
@@ -76,62 +97,14 @@ function App() {
                       <br />
                       <SubmitButton
                         callState={apiCallState}
+                        invalid={validationState.tag !== "VALIDATED"}
                         text="Run"
                         loadingText="Running..."
                       />
 
-                      {apiCallState.tag === State.FAILED ? (
-                        <Alert
-                          type={AlertType.DANGER}
-                          title="Error"
-                          message={apiCallState.error}
-                        />
-                      ) : null}
-
-                      {apiCallState.tag === State.SUCCEEDED ? (
-                        <>
-                          <pre>{apiCallState.response.SQL}</pre>
-                          <AceEditor
-                            value={JSON.stringify(
-                              JSON.parse(apiCallState.response.Res),
-                              null,
-                              2,
-                            )}
-                            mode="json"
-                            readOnly={true}
-                            maxLines={Infinity}
-                            highlightActiveLine={false}
-                            setOptions={{
-                              showLineNumbers: false,
-                              highlightGutterLine: false,
-                            }}
-                          />
-                        </>
-                      ) : null}
-                    </td>
-                    <td>
                       {validationState.tag === "VALIDATED" ||
                       validationState.tag === "VALIDATING" ? (
                         <>
-                          <h2>Schema</h2>
-                          <ul>
-                            {Object.keys(schemaDesc.Tables)
-                              .sort()
-                              .map(tableName => (
-                                <li key={tableName}>
-                                  {tableName}
-                                  <ul>
-                                    {Object.keys(
-                                      schemaDesc.Tables[tableName].Columns,
-                                    )
-                                      .sort()
-                                      .map(colName => (
-                                        <li key={colName}>{colName}</li>
-                                      ))}
-                                  </ul>
-                                </li>
-                              ))}
-                          </ul>
                           <h2>Errors</h2>
                           <ul>
                             {/* TODO(vilterp): de-kludge this */}
@@ -162,6 +135,35 @@ function App() {
                           validationState.resp.ParseError
                             ? validationState.resp.ParseError
                             : null}
+                        </>
+                      ) : null}
+
+                      {apiCallState.tag === State.FAILED ? (
+                        <Alert
+                          type={AlertType.DANGER}
+                          title="Error"
+                          message={apiCallState.error}
+                        />
+                      ) : null}
+
+                      {apiCallState.tag === State.SUCCEEDED ? (
+                        <>
+                          <pre>{apiCallState.response.SQL}</pre>
+                          <AceEditor
+                            value={JSON.stringify(
+                              JSON.parse(apiCallState.response.Res),
+                              null,
+                              2,
+                            )}
+                            mode="json"
+                            readOnly={true}
+                            maxLines={Infinity}
+                            highlightActiveLine={false}
+                            setOptions={{
+                              showLineNumbers: false,
+                              highlightGutterLine: false,
+                            }}
+                          />
                         </>
                       ) : null}
                     </td>
