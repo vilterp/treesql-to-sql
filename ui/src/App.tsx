@@ -16,6 +16,7 @@ import {
 import Load from "./util/Load";
 import { Alert, AlertType } from "./util/alert";
 import { formatSpan } from "./format";
+import { SchemaView } from "./SchemaView";
 
 interface AppState {
   cursorPos: SourcePosition;
@@ -47,24 +48,14 @@ function App() {
                   <tr style={{ verticalAlign: "top" }}>
                     <td>
                       <h2>Schema</h2>
-                      <ul>
-                        {Object.keys(schemaDesc.Tables)
-                          .sort()
-                          .map(tableName => (
-                            <li key={tableName}>
-                              {tableName}
-                              <ul>
-                                {Object.keys(
-                                  schemaDesc.Tables[tableName].Columns,
-                                )
-                                  .sort()
-                                  .map(colName => (
-                                    <li key={colName}>{colName}</li>
-                                  ))}
-                              </ul>
-                            </li>
-                          ))}
-                      </ul>
+                      <SchemaView
+                        schema={schemaDesc}
+                        highlighted={
+                          validationState.tag === "VALIDATED"
+                            ? validationState.resp.HighlightedElement
+                            : null
+                        }
+                      />
                     </td>
                     <td style={{ width: 800 }}>
                       <div style={{ border: "1px solid black" }}>
@@ -97,7 +88,6 @@ function App() {
                       <br />
                       <SubmitButton
                         callState={apiCallState}
-                        invalid={validationState.tag !== "VALIDATED"}
                         text="Run"
                         loadingText="Running..."
                       />
@@ -105,6 +95,18 @@ function App() {
                       {validationState.tag === "VALIDATED" ||
                       validationState.tag === "VALIDATING" ? (
                         <>
+                          <h2>Completions</h2>
+                          <ul>
+                            {(
+                              (validationState.resp
+                                ? validationState.resp.Completions
+                                : []) || []
+                            ).map((comp, idx) => (
+                              <li key={idx}>
+                                {comp.Kind}: {comp.Content}
+                              </li>
+                            ))}
+                          </ul>
                           <h2>Errors</h2>
                           <ul>
                             {/* TODO(vilterp): de-kludge this */}
@@ -115,18 +117,6 @@ function App() {
                             ).map((err, idx) => (
                               <li key={idx}>
                                 {formatSpan(err.Span)}: {err.Message}
-                              </li>
-                            ))}
-                          </ul>
-                          <h2>Completions</h2>
-                          <ul>
-                            {(
-                              (validationState.resp
-                                ? validationState.resp.Completions
-                                : []) || []
-                            ).map((comp, idx) => (
-                              <li key={idx}>
-                                {comp.Kind}: {comp.Content}
                               </li>
                             ))}
                           </ul>

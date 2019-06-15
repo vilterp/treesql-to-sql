@@ -22,6 +22,7 @@ export interface ValidationResp {
     Message: string;
   }[];
   ParseError: string;
+  HighlightedElement: HighlightedElement;
 }
 
 export interface Span {
@@ -44,6 +45,16 @@ export interface TableDesc {
 }
 
 export interface ColumnDesc {}
+
+export interface HighlightedElement {
+  Node: TextNode;
+  Path: string;
+}
+
+export interface TextNode {
+  Span: Span;
+  Text: string;
+}
 
 export function runQuery(req: Req): Promise<Resp> {
   return fetch("/query", {

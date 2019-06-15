@@ -7,7 +7,11 @@ export enum AlertType {
   DANGER = "danger",
 }
 
-export function Alert(props: { type: AlertType, title: string, message: string }) {
+export function Alert(props: {
+  type: AlertType;
+  title: string;
+  message: string;
+}) {
   return (
     <div style={{ color: "red" }}>
       {props.title}: {props.message}
