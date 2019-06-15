@@ -20,7 +20,7 @@ export interface ValidationResp {
   Errors: {
     Span: Span;
     Message: string;
-  };
+  }[];
   ParseError: string;
 }
 

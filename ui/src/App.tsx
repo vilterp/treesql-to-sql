@@ -15,6 +15,7 @@ import {
 } from "./api";
 import Load from "./util/Load";
 import { Alert, AlertType } from "./util/alert";
+import { formatSpan } from "./format";
 
 interface AppState {
   cursorPos: SourcePosition;
@@ -52,6 +53,17 @@ function App() {
                           onChange={value =>
                             update(st => ({ ...st, query: value }))
                           }
+                          onCursorChange={evt => {
+                            const cursor = evt.getCursor();
+                            update(st => ({
+                              ...st,
+                              cursorPos: {
+                                Line: cursor.row + 1,
+                                Col: cursor.column + 1,
+                                Offset: 1, // TODO(vilterp): do something about offset
+                              },
+                            }));
+                          }}
                           highlightActiveLine={false}
                           showGutter={false}
                           setOptions={{
@@ -85,17 +97,6 @@ function App() {
                               null,
                               2,
                             )}
-                            onCursorChange={evt => {
-                              const cursor = evt.getCursor();
-                              update(st => ({
-                                ...st,
-                                cursorPos: {
-                                  Line: cursor.row,
-                                  Col: cursor.column + 1,
-                                  Offset: 1, // TODO(vilterp): do something about offset
-                                },
-                              }));
-                            }}
                             mode="json"
                             readOnly={true}
                             maxLines={Infinity}
@@ -112,17 +113,29 @@ function App() {
                       <h2>Schema</h2>
                       {JSON.stringify(schemaDesc, null, 2)}
                       <h2>Errors</h2>
-                      {validationState.tag === "VALIDATED"
-                        ? JSON.stringify(validationState.resp.Errors, null, 2)
-                        : null}
+                      {validationState.tag === "VALIDATED" ? (
+                        <ul>
+                          {(validationState.resp.Errors || []).map(
+                            (err, idx) => (
+                              <li key={idx}>
+                                {formatSpan(err.Span)}: {err.Message}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      ) : null}
                       <h2>Completions</h2>
-                      {validationState.tag === "VALIDATED"
-                        ? JSON.stringify(
-                            validationState.resp.Completions,
-                            null,
-                            2,
-                          )
-                        : null}
+                      {validationState.tag === "VALIDATED" ? (
+                        <ul>
+                          {(validationState.resp.Completions || []).map(
+                            (comp, idx) => (
+                              <li key={idx}>
+                                {comp.Kind}: {comp.Content}
+                              </li>
+                            ),
+                          )}
+                        </ul>
+                      ) : null}
                       <h2>Parse Error</h2>
                       {validationState.tag === "VALIDATED"
                         ? JSON.stringify(
