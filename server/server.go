@@ -160,9 +160,12 @@ func (s *Server) schemaForLanguage() *treesql.SchemaDesc {
 	sd := &treesql.SchemaDesc{
 		Tables: map[string]*treesql.TableDesc{},
 	}
-	for name := range s.schema {
+	for name, table := range s.schema {
 		tbl := &treesql.TableDesc{
 			Columns: map[string]*treesql.ColDesc{},
+		}
+		for _, col := range table.Columns {
+			tbl.Columns[col.ColumnName] = &treesql.ColDesc{}
 		}
 		sd.Tables[name] = tbl
 	}

@@ -11,7 +11,8 @@ import (
 type TableWithFKs struct {
 	Table *models.Table
 	// TODO(vilterp): get columns
-	FKs []*models.ForeignKey
+	FKs     []*models.ForeignKey
+	Columns []*models.Column
 }
 
 func (t *TableWithFKs) FindColPointingAt(table string) (string, error) {
@@ -36,9 +37,14 @@ func LoadSchema(conn *sql.DB) (Schema, error) {
 		if err != nil {
 			return nil, err
 		}
+		columns, err := models.PgTableColumns(conn, "public", table.TableName, false)
+		if err != nil {
+			return nil, err
+		}
 		out[table.TableName] = &TableWithFKs{
-			Table: table,
-			FKs:   foreignKeys,
+			Table:   table,
+			FKs:     foreignKeys,
+			Columns: columns,
 		}
 	}
 	return out, nil
