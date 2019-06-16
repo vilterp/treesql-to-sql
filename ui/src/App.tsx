@@ -57,11 +57,11 @@ function App() {
                         }
                       />
                     </td>
-                    <td style={{ width: 800 }}>
+                    <td style={{ width: 500 }}>
                       <div style={{ border: "1px solid black" }}>
                         <AceEditor
                           value={state.query}
-                          height="300px"
+                          height="200px"
                           onChange={value =>
                             update(st => ({ ...st, query: value }))
                           }
@@ -135,7 +135,8 @@ function App() {
                           message={apiCallState.error}
                         />
                       ) : null}
-
+                    </td>
+                    <td>
                       {apiCallState.tag === State.SUCCEEDED ? (
                         <>
                           <pre>{apiCallState.response.SQL}</pre>

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	connParams := envy.Get("CONN_PARAMS", "user=root dbname=management_console_production sslmode=disable port=26257")
+	connParams := envy.Get("CONN_PARAMS", "user=root dbname=blog sslmode=disable port=26257")
 
 	host := envy.Get("HOST", "0.0.0.0")
 	port := envy.Get("PORT", "9001")
