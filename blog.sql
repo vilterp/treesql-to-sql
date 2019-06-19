@@ -9,3 +9,12 @@ CREATE TABLE comments (
   post_id INT REFERENCES posts,
   body TEXT
 );
+
+INSERT INTO posts VALUES
+  (1, 'hello world', 'bloop doop'),
+  (2, 'hello again', 'woop loop');
+
+INSERT INTO comments VALUES
+  (1, 1, 'a comment'),
+  (2, 1, 'another comment'),
+  (3, 2, 'a third comment');
