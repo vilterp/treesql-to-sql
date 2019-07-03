@@ -22,7 +22,8 @@ func LiveQuery(conn *sql.DB, dbSchema schema2.Schema) (chan *Event, error) {
 	}
 
 	c := make(chan *Event)
-	for tableName := range dbSchema {
+	for tn := range dbSchema {
+		tableName := tn // because Go closures and loops interact weirdly
 		go func() {
 			res, err := conn.Query(fmt.Sprintf("CREATE CHANGEFEED FOR TABLE %s WITH cursor = '%s'", tableName, timestamp))
 			if err != nil {
