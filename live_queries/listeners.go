@@ -1,14 +1,16 @@
 package live_queries
 
+import "log"
+
 type Listeners struct {
 	listeners      map[int]*Listener
 	nextListenerID int
 }
 
 type Listener struct {
-	Insert func(r Row)
-	Update func(before Row, after Row)
-	Delete func(r Row)
+	Insert func(r Row) error
+	Update func(before Row, after Row) error
+	Delete func(r Row) error
 }
 
 type ListenerID int
@@ -23,21 +25,27 @@ func (l *Listeners) Process(evt *Event) {
 	for _, listener := range l.listeners {
 		if evt.Payload.After != nil && evt.Payload.Before != nil {
 			if listener.Update != nil {
-				listener.Update(evt.Payload.Before, evt.Payload.After)
+				if err := listener.Update(evt.Payload.Before, evt.Payload.After); err != nil {
+					log.Println("error from update listener:", err)
+				}
 			}
-			break
+			continue
 		}
 		if evt.Payload.After != nil {
 			if listener.Insert != nil {
-				listener.Insert(evt.Payload.After)
+				if err := listener.Insert(evt.Payload.After); err != nil {
+					log.Println("error from insert listener:", err)
+				}
 			}
-			break
+			continue
 		}
 		if evt.Payload.Before != nil {
 			if listener.Delete != nil {
-				listener.Delete(evt.Payload.Before)
+				if err := listener.Delete(evt.Payload.Before); err != nil {
+					log.Println("error from delete listener:", err)
+				}
 			}
-			break
+			continue
 		}
 	}
 }
