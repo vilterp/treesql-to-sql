@@ -10,6 +10,7 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/vilterp/go-parserlib/examples/treesql"
 	"github.com/vilterp/treesql-to-sql/live_queries"
 	"github.com/vilterp/treesql-to-sql/querygen"
@@ -58,6 +59,7 @@ func NewServer(connParams string, listeners []*ListenerSpec) (*Server, error) {
 	mux.Handle("/query", http.HandlerFunc(s.serveSQL))
 	mux.Handle("/schema", http.HandlerFunc(s.serveSchema))
 	mux.Handle("/validate", http.HandlerFunc(s.serveValidate))
+	mux.Handle("/metrics", promhttp.Handler())
 	mux.Handle("/", http.FileServer(http.Dir("ui/build")))
 
 	// add listeners

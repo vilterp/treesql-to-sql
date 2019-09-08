@@ -11,7 +11,7 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	s, err := NewServer("user=root dbname=management_console_dev sslmode=disable port=26257")
+	s, err := NewServer("user=root dbname=management_console_dev sslmode=disable port=26257", nil)
 	assert.NoError(t, err)
 
 	ts := httptest.NewServer(util.Logger(s))

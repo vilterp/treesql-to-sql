@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type Listeners struct {
@@ -24,6 +26,15 @@ type Listener struct {
 
 type ListenerID int
 
+var histogram = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+	Name:    "listener_run_time",
+	Buckets: prometheus.LinearBuckets(0, 100, 50),
+}, []string{"listener_name", "table"})
+
+func init() {
+	prometheus.MustRegister(histogram)
+}
+
 func NewListeners() *Listeners {
 	return &Listeners{
 		listeners: map[int]*listenerWrapper{},
@@ -40,6 +51,12 @@ func (l *Listeners) Process(evt *Event) {
 		} else {
 			log.Printf("ran listener %v (%v)", listener.name, dur)
 		}
+		labels := prometheus.Labels{
+			"listener_name": listener.name,
+			"table":         evt.Table,
+		}
+		//fmt.Println(float64(dur / time.Millisecond))
+		histogram.With(labels).Observe(float64(dur / time.Millisecond))
 	}
 }
 
