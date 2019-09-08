@@ -17,12 +17,13 @@ import (
 )
 
 type Server struct {
-	conn   *sql.DB
-	mux    *http.ServeMux
-	schema schema.Schema
+	conn           *sql.DB
+	mux            *http.ServeMux
+	schema         schema.Schema
+	tableListeners map[string]*live_queries.Listeners
 }
 
-func NewServer(connParams string) (*Server, error) {
+func NewServer(connParams string, listeners map[string][]*live_queries.Listener) (*Server, error) {
 	conn, err := sql.Open("postgres", connParams)
 	if err != nil {
 		return nil, err
@@ -42,15 +43,23 @@ func NewServer(connParams string) (*Server, error) {
 	mux := http.NewServeMux()
 
 	s := &Server{
-		conn:   conn,
-		mux:    mux,
-		schema: dbSchema,
+		conn:           conn,
+		mux:            mux,
+		schema:         dbSchema,
+		tableListeners: map[string]*live_queries.Listeners{},
 	}
 
 	mux.Handle("/query", http.HandlerFunc(s.serveSQL))
 	mux.Handle("/schema", http.HandlerFunc(s.serveSchema))
 	mux.Handle("/validate", http.HandlerFunc(s.serveValidate))
 	mux.Handle("/", http.FileServer(http.Dir("ui/build")))
+
+	// add listeners
+	for tableName, lList := range listeners {
+		for _, l := range lList {
+			s.addListener(tableName, l)
+		}
+	}
 
 	events, err := live_queries.LiveQuery(conn, dbSchema)
 	if err != nil {
@@ -60,10 +69,19 @@ func NewServer(connParams string) (*Server, error) {
 		for {
 			evt := <-events
 			log.Printf("changefeed event %#v", evt)
+			s.callListeners(evt)
 		}
 	}()
 
 	return s, nil
+}
+
+func (s *Server) callListeners(evt *live_queries.Event) {
+	tableListeners, ok := s.tableListeners[evt.Table]
+	if !ok {
+		return
+	}
+	tableListeners.Process(evt)
 }
 
 func (s *Server) serveSQL(w http.ResponseWriter, req *http.Request) {
@@ -190,4 +208,16 @@ func (s *Server) serveValidate(w http.ResponseWriter, req *http.Request) {
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	s.mux.ServeHTTP(w, req)
+}
+
+func (s *Server) addListener(tableName string, l *live_queries.Listener) {
+	if _, ok := s.schema[tableName]; !ok {
+		panic(fmt.Sprintf("table doesn't exist: %v", tableName))
+	}
+	listeners, ok := s.tableListeners[tableName]
+	if !ok {
+		listeners = live_queries.NewListeners()
+		s.tableListeners[tableName] = listeners
+	}
+	listeners.AddListener(l)
 }

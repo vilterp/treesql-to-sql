@@ -22,9 +22,11 @@ type Event struct {
 }
 
 type EventPayload struct {
-	Before map[string]interface{}
-	After  map[string]interface{}
+	Before Row
+	After  Row
 }
+
+type Row map[string]interface{}
 
 func LiveQuery(conn *sql.DB, dbSchema schema2.Schema) (chan *Event, error) {
 	res := conn.QueryRow("SELECT cluster_logical_timestamp()")
