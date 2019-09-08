@@ -32,15 +32,21 @@ func main() {
 		panic(err)
 	}
 
-	s, err := server.NewServer(connParams, map[string][]*Listener{
-		"audit_log": {
-			&Listener{
+	s, err := server.NewServer(connParams, []*server.ListenerSpec{
+		{
+			TableName: "audit_log",
+			Name:      "log",
+			Listener: &Listener{
 				Insert: func(r Row) error {
 					log.Println("listener: insert row:", r)
 					return nil
 				},
 			},
-			sl,
+		},
+		{
+			TableName: "audit_log",
+			Name:      "snowflake",
+			Listener:  sl,
 		},
 	})
 	if err != nil {

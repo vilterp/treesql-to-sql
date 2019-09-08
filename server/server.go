@@ -23,7 +23,13 @@ type Server struct {
 	tableListeners map[string]*live_queries.Listeners
 }
 
-func NewServer(connParams string, listeners map[string][]*live_queries.Listener) (*Server, error) {
+type ListenerSpec struct {
+	TableName string
+	Name      string
+	Listener  *live_queries.Listener
+}
+
+func NewServer(connParams string, listeners []*ListenerSpec) (*Server, error) {
 	conn, err := sql.Open("postgres", connParams)
 	if err != nil {
 		return nil, err
@@ -55,10 +61,8 @@ func NewServer(connParams string, listeners map[string][]*live_queries.Listener)
 	mux.Handle("/", http.FileServer(http.Dir("ui/build")))
 
 	// add listeners
-	for tableName, lList := range listeners {
-		for _, l := range lList {
-			s.addListener(tableName, l)
-		}
+	for _, l := range listeners {
+		s.addListener(l.TableName, l.Name, l.Listener)
 	}
 
 	events, err := live_queries.LiveQuery(conn, dbSchema)
@@ -210,7 +214,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	s.mux.ServeHTTP(w, req)
 }
 
-func (s *Server) addListener(tableName string, l *live_queries.Listener) {
+func (s *Server) addListener(tableName string, name string, l *live_queries.Listener) {
 	if _, ok := s.schema[tableName]; !ok {
 		panic(fmt.Sprintf("table doesn't exist: %v", tableName))
 	}
@@ -219,5 +223,5 @@ func (s *Server) addListener(tableName string, l *live_queries.Listener) {
 		listeners = live_queries.NewListeners()
 		s.tableListeners[tableName] = listeners
 	}
-	listeners.AddListener(l)
+	listeners.AddListener(name, l)
 }
