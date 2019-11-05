@@ -42,7 +42,7 @@ function App() {
                 Query: st.query,
               })
             }
-            render={({ state, update, apiCallState, validationState }) => (
+            render={({ state, validationState, update, apiCallState }) => (
               <table>
                 <tbody>
                   <tr style={{ verticalAlign: "top" }}>
