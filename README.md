@@ -41,3 +41,8 @@ A lot of things.
 - `ORDER BY`
 - Joining from one to one (only supports one to many)
 - etc
+
+## Related work
+
+- [EdgeDB's EdgeQL](https://edgedb.com/) is another attempt to find a hybrid syntax between GraphQL and SQL
+- [Hasura](https://hasura.io/) generates correlated subqueries from GraphQL queries, I believe
