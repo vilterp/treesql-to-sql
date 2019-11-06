@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	_ "github.com/lib/pq"
-
 	"github.com/vilterp/treesql-to-sql/parse"
 )
 

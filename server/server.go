@@ -33,11 +33,11 @@ func NewServer(connParams string) (*Server, error) {
 		return nil, err
 	}
 
-	log.Println("creating live query schema...")
-	if err := live_queries.CreateSchema(conn); err != nil {
-		return nil, err
-	}
-	log.Println("created live query schema")
+	//log.Println("creating live query schema...")
+	//if err := live_queries.CreateSchema(conn); err != nil {
+	//	return nil, err
+	//}
+	//log.Println("created live query schema")
 
 	mux := http.NewServeMux()
 
