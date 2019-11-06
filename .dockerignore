@@ -1,0 +1,4 @@
+ui/build
+ui/node_modules
+cockroach-data
+bin
