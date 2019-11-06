@@ -2,11 +2,11 @@
 
 ![screenshot](images/image.png)
 
-_TreeSQL UI Console.
-- Schema on the left
-- TreeSQL editor and completions in the middle
-- generated SQL on the top right
-- JSON results on the bottom right_
+_TreeSQL UI Console._
+- _Schema on the left_
+- _TreeSQL editor and completions in the middle_
+- _generated SQL on the top right_
+- _JSON results on the bottom right_
 
 ## What is in this repo?
 
