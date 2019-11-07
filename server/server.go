@@ -11,7 +11,6 @@ import (
 
 	_ "github.com/lib/pq"
 	"github.com/vilterp/go-parserlib/examples/treesql"
-	"github.com/vilterp/treesql-to-sql/live_queries"
 	"github.com/vilterp/treesql-to-sql/querygen"
 	"github.com/vilterp/treesql-to-sql/schema"
 )
@@ -52,16 +51,16 @@ func NewServer(connParams string) (*Server, error) {
 	mux.Handle("/validate", http.HandlerFunc(s.serveValidate))
 	mux.Handle("/", http.FileServer(http.Dir("ui/build")))
 
-	events, err := live_queries.LiveQuery(conn, dbSchema)
-	if err != nil {
-		return nil, err
-	}
-	go func() {
-		for {
-			evt := <-events
-			log.Printf("changefeed event %#v", evt)
-		}
-	}()
+	//events, err := live_queries.LiveQuery(conn, dbSchema)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//go func() {
+	//	for {
+	//		evt := <-events
+	//		log.Printf("changefeed event %#v", evt)
+	//	}
+	//}()
 
 	return s, nil
 }
