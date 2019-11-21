@@ -1,3 +1,5 @@
+MAKEFLAGS += -j8
+
 .PHONY: all
 all: ui bin/server
 
@@ -18,6 +20,12 @@ test:
 	go test ./...
 
 .PHONY: deps
-deps:
+deps: ui-deps go-deps
+
+.PHONY: ui-deps
+ui-deps:
 	cd ui && yarn
+
+.PHONY: go-deps
+go-deps:
 	go mod download
