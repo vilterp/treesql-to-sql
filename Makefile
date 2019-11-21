@@ -4,7 +4,7 @@ MAKEFLAGS += -j8
 all: ui bin/server
 
 .PHONY: ui
-ui:
+ui: ui-deps
 	cd ui && yarn build
 
 .PHONY: run
@@ -12,7 +12,7 @@ run:
 	go run -v main.go
 
 .PHONY: bin/server
-bin/server:
+bin/server: go-deps
 	go build -v -o bin/server .
 
 .PHONY: test
