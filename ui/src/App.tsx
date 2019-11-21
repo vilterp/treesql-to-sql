@@ -23,6 +23,17 @@ interface AppState {
   query: string;
 }
 
+const INITIAL_QUERY = `MANY posts {
+  id,
+  title,
+  body,
+  comments: MANY comments {
+    id,
+    author_id,
+    body
+  }
+}`;
+
 function App() {
   return (
     <>
@@ -33,7 +44,7 @@ function App() {
           <Form<AppState, Resp, ValidationResp>
             initialState={{
               cursorPos: { Line: 1, Col: 1, Offset: 1 },
-              query: ``,
+              query: INITIAL_QUERY,
             }}
             submit={runQuery}
             validate={st =>
