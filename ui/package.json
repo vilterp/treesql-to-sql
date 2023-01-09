@@ -7,7 +7,7 @@
     "@types/react": "16.7.13",
     "@types/react-dom": "16.0.11",
     "brace": "^0.11.1",
-    "luxon": "^1.8.2",
+    "luxon": "^2.5.2",
     "react": "^16.6.3",
     "react-ace": "^6.5.0",
     "react-dom": "^16.6.3",
